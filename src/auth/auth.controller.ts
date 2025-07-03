@@ -1,5 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { MessagePattern } from '@nestjs/microservices';
+import { CreateAuthDto } from './dto/create-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +14,19 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() body: { email: string, password: string, role: 'ESTUDIANTE' | 'DOCENTE' }) {
-    return this.authService.register(body.email, body.password, body.role);
+  async register(@Body() body: { email: string, password: string }) {
+    return this.authService.register(body.email, body.password);
+  }
+
+  @MessagePattern({ cmd: 'register' })
+  async handleGenerateAuth(data: CreateAuthDto) {
+    return this.authService.register(data.email, data.password);
+  }
+
+  @MessagePattern({ cmd: 'login' })
+  async handleLogin(data: CreateAuthDto) {
+    const user = await this.authService.validateUser(data.email, data.password);
+    return this.authService.login(user);
   }
 }
+

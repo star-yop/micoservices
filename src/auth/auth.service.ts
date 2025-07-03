@@ -1,9 +1,7 @@
-// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from '@prisma/client'; 
 
 @Injectable()
 export class AuthService {
@@ -22,13 +20,13 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  async register(email: string, password: string, role: Role) {
-    return this.usersService.createUser(email, password, role);
+  async register(email: string, password: string) {
+    return this.usersService.createUser(email, password);
   }
 }
